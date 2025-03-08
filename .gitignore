@@ -1,0 +1,48 @@
+# System State Monitor specific ignores
+
+# Ignore all system state snapshot directories
+SystemState_*/
+
+# PowerShell logs
+*.log
+
+# Windows-specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Visual Studio Code files
+.vscode/
+
+# Custom temporary folders/files
+temp/
+tmp/
+*.tmp
+
+# Windows image file caches
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
+
+# PowerShell specific
+*.msi
+*.ps1xml
+*.exe
+*.dll
+*.pdb
+*.mof
+*.mfl
+*.clixml
+*.cdxml
+
+# PowerShell Module output
+/output/
+
+# PowerShell runtime state
+.powershell/
+.pshost.exe.*

@@ -1,9 +1,15 @@
-# SystemMonitor.ps1
+# Collector.ps1
 # Main script for collecting and comparing system state information
 
 param(
+    [Parameter(Position=0)]
     [string]$OutputPath = $PSScriptRoot,
-    [switch]$CompareWithLatest
+    
+    [Parameter(Position=1)]
+    [switch]$CompareWithLatest,
+    
+    [Parameter(HelpMessage="Help text explaining the parameter")]
+    [string]$Description = "System state snapshot"
 )
 
 # Ensure all paths are absolute
@@ -156,7 +162,7 @@ $summaryPath = Join-Path -Path $snapshotFolder -ChildPath "summary.txt"
 
 # Generate summary
 $summary = Get-SystemSummary -StateData $systemState
-Show-SystemSummary -Summary $summary -OutputPath $jsonFilePath
+Show-SystemSummary -Summary $summary -OutputPath $summaryPath
 
 # Check if we should compare with the latest previous snapshot
 if ($CompareWithLatest) {
@@ -185,6 +191,6 @@ if ($CompareWithLatest) {
 }
 
 Write-Host "`nTo compare snapshots later, dot-source this script and use:" -ForegroundColor Magenta
-Write-Host ". .\SystemMonitor.ps1" -ForegroundColor DarkGray
+Write-Host ". .\Collector.ps1" -ForegroundColor DarkGray
 Write-Host "Compare-SystemStates -BaselinePath 'SystemState_[earlier-date]' -CurrentPath 'SystemState_[later-date]'" -ForegroundColor DarkGray
 Write-Host "Compare-SystemStates -BaselinePath 'SystemState_[earlier-date]' -CurrentPath 'SystemState_[later-date]' -Sections 'Path','InstalledPrograms','Network'" -ForegroundColor DarkGray

@@ -45,7 +45,7 @@ function Compare-NetworkSettings {
         $baselineAdapter = $baselineAdapters[$adapter]
         $currentAdapter = $currentAdapters[$adapter]
         
-        Write-Host "    * $adapter:" -ForegroundColor Cyan
+        Write-Host "    * ${adapter}:" -ForegroundColor Cyan
         
         if ($baselineAdapter.Status -ne $currentAdapter.Status) {
             Write-Host "      Status changed: $($baselineAdapter.Status) -> $($currentAdapter.Status)" -ForegroundColor Cyan
@@ -80,7 +80,7 @@ function Compare-NetworkSettings {
         $baselineIP = $baselineIPs[$interface]
         $currentIP = $currentIPs[$interface]
         
-        Write-Host "    * $interface:" -ForegroundColor Cyan
+        Write-Host "    * ${interface}:" -ForegroundColor Cyan
         
         if ($baselineIP.IPv4Address -ne $currentIP.IPv4Address) {
             Write-Host "      IP address changed: $($baselineIP.IPv4Address) -> $($currentIP.IPv4Address)" -ForegroundColor Cyan
@@ -141,7 +141,7 @@ function Compare-EnvironmentVariables {
         $baselineShort = if ($baselineValue.Length -gt 50) { $baselineValue.Substring(0, 47) + "..." } else { $baselineValue }
         $currentShort = if ($currentValue.Length -gt 50) { $currentValue.Substring(0, 47) + "..." } else { $currentValue }
         
-        Write-Host "    * $var:" -ForegroundColor Cyan
+        Write-Host "    * ${var}:" -ForegroundColor Cyan
         Write-Host "      From: $baselineShort" -ForegroundColor DarkGray
         Write-Host "      To:   $currentShort" -ForegroundColor Cyan
     }
@@ -152,3 +152,39 @@ function Compare-EnvironmentVariables {
     $baselineUserVars = @{}
     foreach ($var in $Baseline.UserVariables) {
         $baselineUserVars[$var.Name] = $var.Value
+    }
+    
+    $currentUserVars = @{}
+    foreach ($var in $Current.UserVariables) {
+        $currentUserVars[$var.Name] = $var.Value
+    }
+    
+    $newUserVars = $currentUserVars.Keys | Where-Object { $baselineUserVars.Keys -notcontains $_ }
+    $removedUserVars = $baselineUserVars.Keys | Where-Object { $currentUserVars.Keys -notcontains $_ }
+    $changedUserVars = $currentUserVars.Keys | Where-Object { 
+        $baselineUserVars.Keys -contains $_ -and 
+        $currentUserVars[$_] -ne $baselineUserVars[$_]
+    }
+    
+    Write-Host "  New user variables ($($newUserVars.Count)):" -ForegroundColor Green
+    $newUserVars | ForEach-Object { 
+        $shortValue = if ($currentUserVars[$_].Length -gt 50) { $currentUserVars[$_].Substring(0, 47) + "..." } else { $currentUserVars[$_] }
+        Write-Host "    * $($_) = $shortValue" -ForegroundColor Green 
+    }
+    
+    Write-Host "  Removed user variables ($($removedUserVars.Count)):" -ForegroundColor Yellow
+    $removedUserVars | ForEach-Object { Write-Host "    * $($_)" -ForegroundColor Yellow }
+    
+    Write-Host "  Changed user variables ($($changedUserVars.Count)):" -ForegroundColor Cyan
+    foreach ($var in $changedUserVars) {
+        $baselineValue = $baselineUserVars[$var]
+        $currentValue = $currentUserVars[$var]
+        
+        $baselineShort = if ($baselineValue.Length -gt 50) { $baselineValue.Substring(0, 47) + "..." } else { $baselineValue }
+        $currentShort = if ($currentValue.Length -gt 50) { $currentValue.Substring(0, 47) + "..." } else { $currentValue }
+        
+        Write-Host "    * ${var}:" -ForegroundColor Cyan
+        Write-Host "      From: $baselineShort" -ForegroundColor DarkGray
+        Write-Host "      To:   $currentShort" -ForegroundColor Cyan
+    }
+}
