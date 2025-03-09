@@ -59,7 +59,7 @@ class SectionAnalyzerRegistry:
         """
         analyzer_class = cls._registry.get(section_name)
         if analyzer_class is None:
-            logger.warning(f"No analyzer registered for section: {section_name}")
+            #logger.warning(f"No analyzer registered for section: {section_name}")
             return None
             
         return analyzer_class()

@@ -106,7 +106,7 @@ class SystemStateAnalyzer:
                 
                 if analyzer is None:
                     # Use a generic approach if no specific analyzer is registered
-                    logger.warning(f"No analyzer registered for section: {section_name}")
+                    #logger.warning(f"No analyzer registered for section: {section_name}")
                     prompt = self.prompt_engine.create_section_prompt(
                         section_name, 
                         section_data,

@@ -1,6 +1,7 @@
 # Collector.ps1
 # Main script for collecting and comparing system state information
 
+
 param(
     [Parameter(Position=0)]
     [string]$OutputPath = $PSScriptRoot,
@@ -11,6 +12,21 @@ param(
     [Parameter(HelpMessage="Help text explaining the parameter")]
     [string]$Description = "System state snapshot"
 )
+
+# Helper function to write JSON without BOM
+function Write-JsonWithoutBOM {
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]$Path,
+        
+        [Parameter(Mandatory=$true)]
+        [string]$JsonContent
+    )
+    
+    $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($Path, $JsonContent, $Utf8NoBomEncoding)
+}
+
 
 # Ensure all paths are absolute
 $ScriptRoot = $PSScriptRoot
@@ -115,7 +131,8 @@ $metadata = @{
     OSVersion = $systemState.OSVersion
     SnapshotDate = $timestamp
 }
-$metadata | ConvertTo-Json | Out-File -FilePath $metadataPath -Encoding utf8
+$jsonContent = $metadata | ConvertTo-Json
+Write-JsonWithoutBOM -Path $metadataPath -JsonContent $jsonContent
 
 # Save each collector's data to a separate JSON file
 Write-Host "Saving data to separate files in: $snapshotFolder" -ForegroundColor Yellow
@@ -138,7 +155,8 @@ function Save-SectionToFile {
             ComputerName = $systemState.ComputerName
             Data = $SectionData
         }
-        $sectionObject | ConvertTo-Json -Depth 10 | Out-File -FilePath $sectionPath -Encoding utf8
+        $jsonContent = $sectionObject | ConvertTo-Json -Depth 10
+        Write-JsonWithoutBOM -Path $sectionPath -JsonContent $jsonContent
         return $true
     }
     return $false
@@ -155,7 +173,8 @@ $systemState.Keys | Where-Object { $_ -notin @('Timestamp', 'ComputerName', 'Use
 
 # Save the report index
 $indexPath = Join-Path -Path $snapshotFolder -ChildPath "index.json"
-$reportIndex | ConvertTo-Json | Out-File -FilePath $indexPath -Encoding utf8
+$jsonContent = $reportIndex | ConvertTo-Json
+Write-JsonWithoutBOM -Path $indexPath -JsonContent $jsonContent
 
 # Create a summary file path for easier reference
 $summaryPath = Join-Path -Path $snapshotFolder -ChildPath "summary.txt"
