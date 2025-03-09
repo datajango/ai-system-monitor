@@ -14,7 +14,7 @@ from prompts.analyzers.startup_programs_analyzer import StartupProgramsAnalyzer
 from prompts.analyzers.running_services_analyzer import RunningServicesAnalyzer
 from prompts.analyzers.disk_space_analyzer import DiskSpaceAnalyzer
 from prompts.analyzers.performance_data_analyzer import PerformanceDataAnalyzer
-from prompts.analyzers.network_analyzer import NetworkAnalyzer
+from prompts.analyzers.network.network_analyzer import NetworkAnalyzer
 from prompts.analyzers.environment_analyzer import EnvironmentAnalyzer
 
 # Import additional analyzers here as they're created

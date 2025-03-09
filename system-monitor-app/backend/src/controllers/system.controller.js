@@ -98,6 +98,55 @@ const systemController = {
             request.log.error(err)
             return reply.code(500).send({ error: 'Failed to compare snapshots', message: err.message })
         }
+    },
+
+    async deleteSnapshotById(request, reply) {
+        try {
+            const { id } = request.params;
+            const result = await systemService.deleteSnapshotById(id);
+
+            if (!result.success) {
+                return reply.code(404).send({ error: 'Snapshot not found' });
+            }
+
+            return reply.code(200).send(result);
+        } catch (err) {
+            request.log.error(err);
+            return reply.code(500).send({ error: 'Failed to delete snapshot', message: err.message });
+        }
+    },
+    // Get all files in a snapshot
+    async getSnapshotFiles(request, reply) {
+        try {
+            const { id } = request.params;
+            const files = await systemService.getSnapshotFiles(id);
+
+            if (!files) {
+                return reply.code(404).send({ error: 'Snapshot not found' });
+            }
+
+            return reply.code(200).send(files);
+        } catch (err) {
+            request.log.error(err);
+            return reply.code(500).send({ error: 'Failed to fetch snapshot files', message: err.message });
+        }
+    },
+
+    // Get a specific file from a snapshot
+    async getSnapshotFile(request, reply) {
+        try {
+            const { id, filename } = request.params;
+            const file = await systemService.getSnapshotFile(id, filename);
+
+            if (!file) {
+                return reply.code(404).send({ error: 'File not found' });
+            }
+
+            return reply.code(200).send(file);
+        } catch (err) {
+            request.log.error(err);
+            return reply.code(500).send({ error: 'Failed to fetch file', message: err.message });
+        }
     }
 }
 
