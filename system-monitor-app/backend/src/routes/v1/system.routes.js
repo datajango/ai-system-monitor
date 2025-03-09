@@ -127,4 +127,84 @@ module.exports = async function (fastify, opts) {
             }
         }
     }, systemController.compareSnapshots)
+
+    fastify.delete('/snapshots/:id', {
+        schema: {
+            description: 'Delete a system snapshot by ID',
+            tags: ['system'],
+            params: {
+                type: 'object',
+                required: ['id'],
+                properties: {
+                    id: { type: 'string' }
+                }
+            },
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean' },
+                        message: { type: 'string' }
+                    }
+                }
+            }
+        }
+    }, systemController.deleteSnapshotById);
+
+    // Get all files in a snapshot
+    fastify.get('/snapshots/:id/files', {
+        schema: {
+            description: 'Get all files in a system snapshot',
+            tags: ['system'],
+            params: {
+                type: 'object',
+                required: ['id'],
+                properties: {
+                    id: { type: 'string' }
+                }
+            },
+            response: {
+                200: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            name: { type: 'string' },
+                            path: { type: 'string' },
+                            size: { type: 'number' },
+                            isDirectory: { type: 'boolean' },
+                            modifiedTime: { type: 'string' },
+                            section: { type: 'string' }
+                        }
+                    }
+                }
+            }
+        }
+    }, systemController.getSnapshotFiles);
+
+    // Get a specific file from a snapshot
+    fastify.get('/snapshots/:id/files/:filename', {
+        schema: {
+            description: 'Get a specific file from a system snapshot',
+            tags: ['system'],
+            params: {
+                type: 'object',
+                required: ['id', 'filename'],
+                properties: {
+                    id: { type: 'string' },
+                    filename: { type: 'string' }
+                }
+            },
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        fileName: { type: 'string' },
+                        content: { type: 'object' },
+                        type: { type: 'string' }
+                    }
+                }
+            }
+        }
+    }, systemController.getSnapshotFile);
 }

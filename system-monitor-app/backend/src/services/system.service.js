@@ -35,6 +35,20 @@ const systemService = {
     // Compare two snapshots
     async compareSnapshots(baselineId, currentId, sections) {
         return await comparisonService.compareSnapshots(baselineId, currentId, sections)
+    },
+
+    async deleteSnapshotById(id) {
+        return await snapshotService.deleteSnapshotById(id);
+    },
+
+    // Get all files in a snapshot
+    async getSnapshotFiles(id) {
+        return await snapshotService.getSnapshotFiles(id);
+    },
+
+    // Get a specific file from a snapshot
+    async getSnapshotFile(id, filename) {
+        return await snapshotService.getSnapshotFile(id, filename);
     }
 }
 
