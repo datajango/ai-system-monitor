@@ -4,13 +4,22 @@ Base class for section-specific analyzers
 
 from abc import ABC, abstractmethod
 from typing import Dict, List, Any, Optional, Set
+import json
+import logging
 
+logger = logging.getLogger(__name__)
 
 class BaseSectionAnalyzer(ABC):
     """
     Base class for section-specific analyzers that defines the interface
     for creating prompts, specifying required input files, and output formats.
     """
+    
+    # Maximum length of JSON data in prompts to prevent API errors
+    MAX_JSON_LENGTH = 8000
+    
+    # Flag to indicate if this analyzer should use chunking for large data
+    USES_CHUNKING = False
     
     @property
     @abstractmethod
@@ -123,6 +132,91 @@ class BaseSectionAnalyzer(ABC):
             "summary": "Brief overall assessment of this section"
         }
     
+    def analyze_with_chunking(self, lm_client, section_data: Any, additional_data: Optional[Dict[str, Any]] = None, llm_log_dir: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Analyze large datasets by breaking them into chunks, to be implemented by subclasses.
+        
+        Args:
+            lm_client: LLM client for making API calls
+            section_data: The section data to analyze
+            additional_data: Optional additional data from other sections
+            llm_log_dir: Directory to save LLM interaction logs, or None to skip
+            
+        Returns:
+            Analysis results
+        """
+        # Default implementation just calls the standard analysis
+        # This should be overridden by analyzers that need chunking
+        logger.warning(f"analyze_with_chunking called on {self.section_name} analyzer but not implemented, falling back to standard analysis")
+        return self.analyze_standard(lm_client, section_data, additional_data, llm_log_dir)
+    
+    def analyze_standard(self, lm_client, section_data: Any, additional_data: Optional[Dict[str, Any]] = None, llm_log_dir: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Standard analysis method for a section using a single LLM call.
+        
+        Args:
+            lm_client: LLM client for making API calls
+            section_data: The section data to analyze
+            additional_data: Optional additional data from other sections
+            llm_log_dir: Directory to save LLM interaction logs, or None to skip
+            
+        Returns:
+            Analysis results
+        """
+        # Create the prompt
+        prompt = self.build_prompt_wrapper(section_data, additional_data)
+        
+        # Initialize LLM log if needed
+        llm_log = None
+        if llm_log_dir:
+            llm_log = {
+                "timestamp": __import__('datetime').datetime.now().isoformat(),
+                "section": self.section_name,
+                "prompt": prompt
+            }
+        
+        # Call the LLM
+        try:
+            response = lm_client.generate(prompt)
+            
+            # Update log if needed
+            if llm_log:
+                llm_log["response"] = response
+                llm_log["status"] = "success"
+                
+            # Extract JSON from response
+            from utils.json_helper import extract_json_from_response
+            analysis = extract_json_from_response(response)
+            
+            # Post-process the results
+            return self.post_process_results(analysis)
+        except Exception as e:
+            # Log the error
+            logger.error(f"Error analyzing {self.section_name}: {str(e)}")
+            import traceback
+            logger.debug(traceback.format_exc())
+            
+            # Update log if needed
+            if llm_log:
+                llm_log["error"] = str(e)
+                llm_log["traceback"] = traceback.format_exc()
+                llm_log["status"] = "error"
+            
+            # Return error structure
+            return {
+                "error": f"Analysis failed: {str(e)}",
+                "traceback": traceback.format_exc()
+            }
+        finally:
+            # Save the log if needed
+            if llm_log and llm_log_dir:
+                import json
+                from pathlib import Path
+                log_file = Path(llm_log_dir) / f"{self.section_name}_llm_interaction.json"
+                with open(log_file, "w", encoding="utf-8") as f:
+                    json.dump(llm_log, f, indent=2, ensure_ascii=False)
+                logger.debug(f"Saved LLM interaction log to {log_file}")
+    
     def build_prompt_wrapper(self, section_data: Any, additional_data: Optional[Dict[str, Any]] = None) -> str:
         """
         Build a complete prompt with standard wrapper text.
@@ -139,7 +233,6 @@ class BaseSectionAnalyzer(ABC):
         
         # Format template as JSON string
         template_json = self.format_json_template()
-        import json
         template_str = json.dumps(template_json, indent=2)
         
         # Create the full wrapped prompt
@@ -154,3 +247,23 @@ Provide your analysis as JSON with the following structure:
 Important: Respond ONLY with valid JSON, no other text before or after.
 """
         return full_prompt
+        
+    def analyze(self, lm_client, section_data: Any, additional_data: Optional[Dict[str, Any]] = None, llm_log_dir: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Main analysis entry point - chooses between chunked and standard analysis.
+        
+        Args:
+            lm_client: LLM client for making API calls
+            section_data: The section data to analyze
+            additional_data: Optional additional data from other sections
+            llm_log_dir: Directory to save LLM interaction logs, or None to skip
+            
+        Returns:
+            Analysis results
+        """
+        if self.USES_CHUNKING:
+            logger.info(f"Using chunked analysis for {self.section_name}")
+            return self.analyze_with_chunking(lm_client, section_data, additional_data, llm_log_dir)
+        else:
+            logger.info(f"Using standard analysis for {self.section_name}")
+            return self.analyze_standard(lm_client, section_data, additional_data, llm_log_dir)
