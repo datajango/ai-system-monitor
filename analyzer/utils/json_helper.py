@@ -52,3 +52,50 @@ def extract_json_from_response(response: str) -> Dict[str, Any]:
         "message": "Failed to parse model response as JSON",
         "raw_response": response
     }
+
+def save_json_file(file_path: str, data: Any, indent: int = 2) -> bool:
+    """
+    Save data to a JSON file, handling encoding correctly.
+    
+    Args:
+        file_path: Path where to save the file
+        data: Data to save (must be JSON-serializable)
+        indent: Indentation level for pretty-printing
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=indent, ensure_ascii=False)
+        return True
+    except Exception as e:
+        logger.error(f"Error saving JSON to {file_path}: {str(e)}")
+        return False
+
+def load_json_file(file_path: str) -> Any:
+    """
+    Load data from a JSON file, handling different encodings.
+    
+    Args:
+        file_path: Path to the JSON file
+        
+    Returns:
+        Parsed JSON data
+        
+    Raises:
+        ValueError: If the file cannot be parsed as JSON
+    """
+    try:
+        # Try with utf-8-sig to handle BOM
+        with open(file_path, 'r', encoding='utf-8-sig') as f:
+            return json.load(f)
+    except json.JSONDecodeError:
+        # If that fails, try with regular utf-8
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            raise ValueError(f"Failed to parse {file_path} as JSON: {str(e)}")
+    except Exception as e:
+        raise ValueError(f"Error reading {file_path}: {str(e)}")

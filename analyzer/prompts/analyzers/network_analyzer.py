@@ -4,9 +4,16 @@ Network configuration analyzer
 
 from typing import Dict, List, Any, Optional, Set
 import re
+import json
+import logging
+from datetime import datetime
+from pathlib import Path
 
 from prompts.base_section_analyzer import BaseSectionAnalyzer
 from prompts.section_analyzers_registry import SectionAnalyzerRegistry
+from utils.json_helper import extract_json_from_response
+
+logger = logging.getLogger(__name__)
 
 
 @SectionAnalyzerRegistry.register
@@ -14,6 +21,12 @@ class NetworkAnalyzer(BaseSectionAnalyzer):
     """
     Analyzer for network configuration and connection data.
     """
+    
+    # Enable chunking for this analyzer
+    USES_CHUNKING = True
+    
+    # Override the max JSON length for this analyzer specifically
+    MAX_JSON_LENGTH = 3000
     
     # Common media types for network adapters
     MEDIA_TYPES = {
@@ -250,8 +263,8 @@ class NetworkAnalyzer(BaseSectionAnalyzer):
         section_json = json.dumps(section_data, ensure_ascii=False)
         
         # Truncate very large sections to avoid hitting token limits
-        if len(section_json) > 10000:
-            section_json = section_json[:10000] + "... [truncated for length]"
+        if len(section_json) > 8000:
+            section_json = section_json[:8000] + "... [truncated for length]"
         
         # Extract key metrics for enhanced prompting
         metrics = self.extract_key_metrics(section_data)
@@ -326,3 +339,291 @@ The network data for analysis:
 ```
 """
         return prompt
+        
+    def analyze_with_chunking(self, lm_client, section_data: Any, additional_data: Optional[Dict[str, Any]] = None, llm_log_dir: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Analyze network configuration by breaking it into separate components.
+        
+        Args:
+            lm_client: LLM client for making API calls
+            section_data: The full network data
+            additional_data: Optional additional data from other sections
+            llm_log_dir: Directory to save LLM interaction logs, or None to skip
+            
+        Returns:
+            Aggregated analysis results
+        """
+        if not isinstance(section_data, dict):
+            return {"error": "Invalid network data format"}
+        
+        # Initialize aggregated results
+        all_issues = []
+        all_optimizations = []
+        component_summaries = []
+        
+        # Define network components to analyze separately
+        components = {
+            "adapters": section_data.get("Adapters", []),
+            "ip_config": section_data.get("IPConfiguration", []),
+            "dns": section_data.get("DNSSettings", []),
+            "connections": section_data.get("ActiveConnections", [])
+        }
+        
+        # Process each component
+        for component_name, component_data in components.items():
+            logger.info(f"Analyzing network component: {component_name}")
+            
+            # Skip empty components
+            if not component_data:
+                logger.warning(f"Network component '{component_name}' is empty, skipping")
+                continue
+            
+            # Create prompt for this component
+            prompt = self._create_component_prompt(component_name, component_data)
+            
+            # Initialize LLM log if needed
+            llm_log = None
+            if llm_log_dir:
+                llm_log = {
+                    "timestamp": datetime.now().isoformat(),
+                    "section": f"Network_{component_name}",
+                    "prompt": prompt
+                }
+            
+            # Call the LLM
+            try:
+                response = lm_client.generate(prompt)
+                
+                # Update log if needed
+                if llm_log:
+                    llm_log["response"] = response
+                    llm_log["status"] = "success"
+                    
+                # Extract JSON from response
+                component_analysis = extract_json_from_response(response)
+                
+                # Collect issues and optimizations
+                if "issues" in component_analysis:
+                    # Tag issues with the component they came from
+                    for issue in component_analysis["issues"]:
+                        issue["component"] = component_name
+                    all_issues.extend(component_analysis["issues"])
+                
+                if "optimizations" in component_analysis:
+                    # Tag optimizations with the component they came from
+                    for opt in component_analysis["optimizations"]:
+                        opt["component"] = component_name
+                    all_optimizations.extend(component_analysis["optimizations"])
+                
+                if "summary" in component_analysis:
+                    component_summaries.append(f"{component_name.upper()}: {component_analysis['summary']}")
+                
+            except Exception as e:
+                # Log the error
+                logger.error(f"Error analyzing network component {component_name}: {str(e)}")
+                import traceback
+                logger.debug(traceback.format_exc())
+                
+                # Update log if needed
+                if llm_log:
+                    llm_log["error"] = str(e)
+                    llm_log["traceback"] = traceback.format_exc()
+                    llm_log["status"] = "error"
+                
+                component_summaries.append(f"Error analyzing {component_name}: {str(e)}")
+            finally:
+                # Save the log if needed
+                if llm_log and llm_log_dir:
+                    log_file = Path(llm_log_dir) / f"Network_{component_name}_llm_interaction.json"
+                    with open(log_file, "w", encoding="utf-8") as f:
+                        json.dump(llm_log, f, indent=2, ensure_ascii=False)
+                    logger.debug(f"Saved LLM interaction log to {log_file}")
+        
+        # Create aggregated analysis
+        aggregated_analysis = {
+            "issues": all_issues,
+            "optimizations": all_optimizations,
+        }
+        
+        # Generate an overall summary from component summaries
+        if component_summaries:
+            metrics = self.extract_key_metrics(section_data)
+            overall_summary_prompt = self._create_overall_summary_prompt(component_summaries, metrics)
+            
+            # Initialize LLM log if needed
+            summary_llm_log = None
+            if llm_log_dir:
+                summary_llm_log = {
+                    "timestamp": datetime.now().isoformat(),
+                    "section": "Network_summary",
+                    "prompt": overall_summary_prompt
+                }
+            
+            try:
+                response = lm_client.generate(overall_summary_prompt)
+                
+                # Update log if needed
+                if summary_llm_log:
+                    summary_llm_log["response"] = response
+                    summary_llm_log["status"] = "success"
+                    
+                summary_analysis = extract_json_from_response(response)
+                
+                if "summary" in summary_analysis:
+                    aggregated_analysis["summary"] = summary_analysis["summary"]
+                else:
+                    # Fallback: Join component summaries
+                    aggregated_analysis["summary"] = "\n".join(component_summaries)
+            except Exception as e:
+                logger.error(f"Error generating overall summary for network analysis: {str(e)}")
+                import traceback
+                logger.debug(traceback.format_exc())
+                
+                # Update log if needed
+                if summary_llm_log:
+                    summary_llm_log["error"] = str(e)
+                    summary_llm_log["traceback"] = traceback.format_exc()
+                    summary_llm_log["status"] = "error"
+                    
+                # Fallback: Join component summaries
+                aggregated_analysis["summary"] = "\n".join(component_summaries)
+            finally:
+                # Save the log if needed
+                if summary_llm_log and llm_log_dir:
+                    log_file = Path(llm_log_dir) / "Network_summary_llm_interaction.json"
+                    with open(log_file, "w", encoding="utf-8") as f:
+                        json.dump(summary_llm_log, f, indent=2, ensure_ascii=False)
+                    logger.debug(f"Saved LLM interaction log to {log_file}")
+        else:
+            aggregated_analysis["summary"] = "No analysis could be generated for any network components."
+        
+        return aggregated_analysis
+    
+    def _create_component_prompt(self, component_name: str, component_data: Any) -> str:
+        """
+        Create a prompt for a specific network component.
+        
+        Args:
+            component_name: Name of the component
+            component_data: Data for this component
+            
+        Returns:
+            Formatted prompt
+        """
+        # For arrays, take a small representative sample
+        if isinstance(component_data, list) and len(component_data) > 5:
+            # Take just a few items - first 2, last 1, and 2 from the middle if possible
+            sample_data = []
+            
+            # Add first 2 items
+            sample_data.extend(component_data[:2])
+            
+            # Add up to 2 items from the middle
+            if len(component_data) > 4:
+                middle_start = len(component_data) // 2 - 1
+                middle_items = component_data[middle_start:middle_start+2]
+                sample_data.extend(middle_items)
+            
+            # Add last item
+            if len(component_data) > 2:
+                sample_data.append(component_data[-1])
+                
+            # Replace the full data with the sample
+            component_data = sample_data
+            
+            logger.info(f"Reduced {component_name} component from {len(component_data)} items to {len(sample_data)} representative items")
+        
+        # Format the data as JSON
+        try:
+            component_json = json.dumps(component_data, ensure_ascii=False)
+        except Exception as e:
+            logger.error(f"Error converting {component_name} component to JSON: {str(e)}")
+            component_json = json.dumps({"error": f"Could not convert to JSON: {str(e)}"})
+        
+        # Strictly enforce a much lower character limit to prevent bad requests
+        if len(component_json) > 1000:  # Much stricter limit
+            component_json = component_json[:1000] + "... [truncated for length]"
+        
+        # Component-specific instructions
+        instructions = {
+            "adapters": """
+    Analyze network adapters, focusing on:
+    1. Adapter status (Up/Down)
+    2. Adapter types and configurations
+    3. Potential issues or misconfigurations
+    """,
+            "ip_config": """
+    Analyze IP configuration, focusing on:
+    1. IP address allocation (DHCP vs static)
+    2. Subnet configuration
+    3. Potential IP addressing issues
+    """,
+            "dns": """
+    Analyze DNS settings, focusing on:
+    1. DNS server configuration
+    2. Security and reliability of DNS settings
+    3. Potential DNS-related issues
+    """,
+            "connections": """
+    Analyze network connections, focusing on:
+    1. Active connection patterns
+    2. Security implications of connections
+    3. Suspicious or potentially problematic connections
+    """
+        }
+        
+        # Simplified template to reduce token usage
+        template = {
+            "issues": [{"severity": "high", "title": "Example issue", "recommendation": "Example action"}],
+            "optimizations": [{"impact": "medium", "title": "Example optimization", "recommendation": "Example action"}],
+            "summary": "Brief assessment"
+        }
+        
+        prompt = f"""
+    Analyze this {component_name} component of a Windows network configuration.
+
+    {instructions.get(component_name, "Analyze this network component.")}
+
+    {component_name} data (sample):
+    ```json
+    {component_json}
+    ```
+
+    Provide JSON analysis with issues, optimizations, and summary.
+    """
+        return prompt
+
+    def _create_overall_summary_prompt(self, component_summaries: List[str], metrics: Dict[str, Any]) -> str:
+        """
+        Create a prompt to generate an overall summary from individual component summaries.
+        
+        Args:
+            component_summaries: List of summaries from individual components
+            metrics: Extracted key metrics
+            
+        Returns:
+            Formatted prompt
+        """
+        # Join the summaries
+        all_summaries = "\n".join(component_summaries)
+        
+        # Format adapter information
+        adapter_info = f"Network Adapters: {metrics['adapters']['count']} total ({metrics['adapters']['up']} up, {metrics['adapters']['down']} down)"
+        
+        # Format connections information
+        connections_info = f"Active Connections: {metrics['connections']['count']}"
+        
+        prompt = f"""
+    Create a concise summary for the Network section based on these component analyses:
+
+    Metrics:
+    - {adapter_info}
+    - {connections_info}
+
+    Component summaries:
+    {all_summaries}
+
+    Provide JSON with just a "summary" field containing your network assessment.
+    """
+        return prompt
+

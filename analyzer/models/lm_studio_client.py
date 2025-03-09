@@ -1,21 +1,25 @@
+# File path: /path/to/your/analyzer/models/lm_studio_client.py
 """
-Client for interacting with LM Studio's API
+Modified client for interacting with LM Studio's API with model selection support
 """
 
 import logging
 import requests
-from typing import Dict, Any
+from typing import Dict, Any, Optional
+import traceback
+import json
 
 logger = logging.getLogger(__name__)
 
 class LMStudioClient:
     """
-    Client for calling the LM Studio API.
+    Client for calling the LM Studio API with model selection support.
     """
     
     def __init__(
         self,
         server_url: str = "http://localhost:1234/v1",
+        model: Optional[str] = None,
         max_tokens: int = 4096,
         temperature: float = 0.7
     ):
@@ -24,12 +28,20 @@ class LMStudioClient:
         
         Args:
             server_url: URL of the LM Studio server
+            model: Model to use (if None, server will use its default)
             max_tokens: Maximum number of tokens for the response
             temperature: Temperature for generation (0.0-1.0)
         """
         self.server_url = server_url
+        self.model = model
         self.max_tokens = max_tokens
         self.temperature = temperature
+        
+        # Log initialization
+        init_msg = f"Initialized LM Studio client with URL: {server_url}"
+        if model:
+            init_msg += f", Model: {model}"
+        logger.debug(init_msg)
     
     def generate(self, prompt: str) -> str:
         """
@@ -53,81 +65,90 @@ class LMStudioClient:
             "stream": False
         }
         
+        # Add model if specified
+        if self.model:
+            payload["model"] = self.model
+            
+        logger.debug(f"Sending request to {completions_url} with model: {self.model or 'default'}")
+        
         try:
-            response = requests.post(completions_url, json=payload)
+            # Convert the payload to JSON to verify it's valid
+            payload_json = json.dumps(payload)
+            
+            # Send the request
+            response = requests.post(
+                completions_url, 
+                json=payload,
+                timeout=120  # 2-minute timeout
+            )
             response.raise_for_status()
             
+            # Parse the response
             response_data = response.json()
-            return response_data["choices"][0]["message"]["content"]
+            if not "choices" in response_data or len(response_data["choices"]) == 0:
+                raise RuntimeError(f"No choices in response: {json.dumps(response_data)}")
+                
+            if not "message" in response_data["choices"][0]:
+                raise RuntimeError(f"No message in first choice: {json.dumps(response_data['choices'][0])}")
+                
+            content = response_data["choices"][0]["message"]["content"]
+            
+            # Log success
+            logger.debug(f"Generated response of {len(content)} characters")
+            return content
             
         except requests.exceptions.RequestException as e:
+            error_message = "Unknown error"
+            status_code = None
+            
+            # Extract detailed error information if available
             if hasattr(e, 'response') and e.response is not None:
                 status_code = e.response.status_code
                 try:
                     error_data = e.response.json()
                     error_message = error_data.get('error', {}).get('message', str(e))
-                except:
+                except Exception:
                     error_message = str(e)
                     
+                # Log the error with HTTP status code
                 logger.error(f"API error ({status_code}): {error_message}")
+                
+                # Check for specific status codes
+                if status_code == 404:
+                    if "model" in payload:
+                        raise RuntimeError(f"Model not found: {payload['model']}. Check if this model exists on your server.") from e
+                    else:
+                        raise RuntimeError(f"API endpoint not found: {completions_url}. Check your server URL.") from e
+                elif status_code == 400:
+                    raise RuntimeError(f"Bad request: {error_message}. Check your prompt or model parameters.") from e
+                elif status_code == 401:
+                    raise RuntimeError("Authentication failed. Check your API key if required.") from e
+                elif status_code in (502, 503, 504):
+                    raise RuntimeError(f"Server error ({status_code}): {error_message}. The server might be overloaded.") from e
             else:
-                logger.error(f"Connection """
-Utility functions for JSON handling
-"""
-
-import json
-import re
-import logging
-from typing import Dict, Any
-
-logger = logging.getLogger(__name__)
-
-def extract_json_from_response(response: str) -> Dict[str, Any]:
-    """
-    Extract JSON from the model's response, handling cases where the model
-    might add extra text before or after the JSON.
-    
-    Args:
-        response: The raw response from the model
-        
-    Returns:
-        Parsed JSON object
-    """
-    # Try to parse the entire response as JSON first
-    try:
-        return json.loads(response)
-    except json.JSONDecodeError:
-        pass
-        
-    # Find JSON-like content using regex
-    json_match = re.search(r'({[\s\S]*})', response)
-    if json_match:
-        try:
-            return json.loads(json_match.group(1))
-        except json.JSONDecodeError:
-            pass
+                # For connection errors without response
+                logger.error(f"Connection error: {str(e)}")
+                
+                if "Connection refused" in str(e):
+                    raise RuntimeError(
+                        f"Connection refused to {self.server_url}. "
+                        "Make sure LM Studio is running and the server is started."
+                    ) from e
+                elif "No connection" in str(e) or "Failed to establish" in str(e):
+                    raise RuntimeError(
+                        f"Failed to connect to {self.server_url}. "
+                        "Check if the server is running and the URL is correct."
+                    ) from e
+                elif "Timeout" in str(e):
+                    raise RuntimeError(
+                        "Request timed out. The server might be overloaded or the model is too large for your system."
+                    ) from e
+                
+            # Generic fallback error
+            raise RuntimeError(f"Failed to get response from LM Studio ({status_code or 'unknown status'}): {error_message}") from e
             
-    # More aggressive approach - try to find anything between curly braces
-    try:
-        start = response.find('{')
-        end = response.rfind('}')
-        if start != -1 and end != -1 and end > start:
-            json_str = response[start:end+1]
-            return json.loads(json_str)
-    except json.JSONDecodeError:
-        pass
-        
-    # If all else fails, return an error structure
-    logger.error("Could not extract valid JSON from model response")
-    logger.debug(f"Failed response: {response}")
-    return {
-        "error": True,
-        "message": "Failed to parse model response as JSON",
-        "raw_response": response
-    }error: {str(e)}")
-                
-            if "Connection refused" in str(e):
-                logger.error("LM Studio server not running or not accessible at the configured URL.")
-                logger.error("Make sure LM Studio is running and the server is started.")
-                
-            raise RuntimeError(f"Failed to get response from LM Studio: {str(e)}")
+        except Exception as e:
+            # For any other unexpected errors
+            logger.error(f"Unexpected error: {str(e)}")
+            logger.debug(traceback.format_exc())
+            raise RuntimeError(f"Unexpected error when calling LM Studio: {str(e)}") from e
