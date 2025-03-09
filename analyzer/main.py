@@ -13,6 +13,7 @@ import sys
 import logging
 import traceback
 import shutil
+import glob
 from pathlib import Path
 
 from analyzer import SystemStateAnalyzer
@@ -88,11 +89,78 @@ def derive_output_paths(snapshot_path, output_base, output_dir=None):
             
     return output_file, output_directory
 
+def find_snapshot_directories(input_dir):
+    """
+    Find all system state snapshot directories in the input directory.
+    
+    Args:
+        input_dir: Path to the directory containing snapshot folders
+        
+    Returns:
+        List of paths to snapshot directories
+    """
+    pattern = os.path.join(input_dir, "SystemState_*")
+    return [path for path in glob.glob(pattern) if os.path.isdir(path)]
+
+def process_snapshot(analyzer, snapshot_path, analysis_focus, output_file, output_dir, clean=False):
+    """
+    Process a single snapshot.
+    
+    Args:
+        analyzer: Instance of SystemStateAnalyzer
+        snapshot_path: Path to the snapshot directory
+        analysis_focus: List of sections to focus on
+        output_file: Path to save the combined analysis
+        output_dir: Directory for individual section outputs
+        clean: Whether to clean output directories before analysis
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        # Derive output paths
+        output_file, output_dir = derive_output_paths(snapshot_path, output_file, output_dir)
+        
+        # Clean output directories if requested
+        if clean:
+            if output_file:
+                output_file_path = Path(output_file)
+                if output_file_path.exists():
+                    output_file_path.unlink()
+                    logger.info(f"Removed existing output file: {output_file}")
+            
+            if output_dir:
+                output_dir_path = Path(output_dir)
+                if output_dir_path.exists():
+                    shutil.rmtree(output_dir_path)
+                    logger.info(f"Removed existing output directory: {output_dir}")
+                # Recreate the directory
+                output_dir_path.mkdir(parents=True, exist_ok=True)
+        
+        if output_file:
+            logger.info(f"Analysis will be saved to: {output_file}")
+        if output_dir:
+            logger.info(f"Section analyses will be saved to: {output_dir}")
+            
+        # Analyze snapshot
+        analyzer.analyze_snapshot(
+            snapshot_path=snapshot_path,
+            analysis_focus=analysis_focus,
+            output_file=output_file,
+            output_dir=output_dir
+        )
+        
+        return True
+    except Exception as e:
+        logger.error(f"Error processing snapshot {snapshot_path}: {str(e)}")
+        return False
+
 def main():
     """
     Main entry point.
     """
     # Setup logging
+    global logger
     logger = setup_logging()
     
     # Determine default config paths
@@ -118,6 +186,10 @@ def main():
         "snapshot_path", 
         nargs="?",
         help="Path to the system state snapshot directory"
+    )
+    parser.add_argument(
+        "--input-dir", "-i",
+        help="Directory containing multiple snapshot folders to process"
     )
     parser.add_argument(
         "--server-url", "-u",
@@ -219,7 +291,7 @@ def main():
         env_path = args.env_file if args.env_file else default_env_path
         create_default_env_file(env_path)
         print(f"Created default .env file at: {env_path}")
-        if not args.snapshot_path:  # Exit if only creating .env file
+        if not args.snapshot_path and not args.input_dir:  # Exit if only creating .env file
             return
     
     # List available analyzers if requested
@@ -291,48 +363,59 @@ def main():
         env_path = args.env_file if args.env_file else '.env'
         config.save_env_config(env_path)
     
-    # Check if snapshot path is provided
-    if not args.snapshot_path:
-        logger.error("No snapshot path provided")
+    # Check if snapshot path or input directory is provided
+    if not args.snapshot_path and not args.input_dir:
+        logger.error("No snapshot path or input directory provided")
         parser.print_help()
         sys.exit(1)
         
     try:
-        # Derive output paths based on snapshot name if needed
-        output_file, output_dir = derive_output_paths(args.snapshot_path, args.output, args.output_dir)
-        
-        # Clean output directories if requested
-        if args.clean:
-            if output_file:
-                output_file_path = Path(output_file)
-                if output_file_path.exists():
-                    output_file_path.unlink()
-                    logger.info(f"Removed existing output file: {output_file}")
-            
-            if output_dir:
-                output_dir_path = Path(output_dir)
-                if output_dir_path.exists():
-                    shutil.rmtree(output_dir_path)
-                    logger.info(f"Removed existing output directory: {output_dir}")
-                # Recreate the directory
-                output_dir_path.mkdir(parents=True, exist_ok=True)
-        
-        if output_file:
-            logger.info(f"Analysis will be saved to: {output_file}")
-        if output_dir:
-            logger.info(f"Section analyses will be saved to: {output_dir}")
-            
         # Initialize analyzer
         analyzer = SystemStateAnalyzer(config)
-            
-        # Analyze snapshot
-        analyzer.analyze_snapshot(
-            snapshot_path=args.snapshot_path,
-            analysis_focus=args.focus,
-            output_file=output_file,
-            output_dir=output_dir
-        )
         
+        if args.input_dir:
+            # Process all snapshots in the input directory
+            snapshots = find_snapshot_directories(args.input_dir)
+            
+            if not snapshots:
+                logger.error(f"No snapshot directories found in {args.input_dir}")
+                sys.exit(1)
+            
+            logger.info(f"Found {len(snapshots)} snapshot directories to process")
+            
+            successful = 0
+            failed = 0
+            
+            for snapshot_path in snapshots:
+                logger.info(f"\n{'='*80}\nProcessing snapshot: {snapshot_path}\n{'='*80}")
+                
+                if process_snapshot(
+                    analyzer=analyzer,
+                    snapshot_path=snapshot_path,
+                    analysis_focus=args.focus,
+                    output_file=args.output,
+                    output_dir=args.output_dir,
+                    clean=args.clean
+                ):
+                    successful += 1
+                else:
+                    failed += 1
+            
+            logger.info(f"\nProcessing complete. Successfully processed {successful} snapshots, {failed} failed.")
+            
+        else:
+            # Process single snapshot
+            snapshot_path = args.snapshot_path
+            
+            process_snapshot(
+                analyzer=analyzer,
+                snapshot_path=snapshot_path,
+                analysis_focus=args.focus,
+                output_file=args.output,
+                output_dir=args.output_dir,
+                clean=args.clean
+            )
+            
     except Exception as e:
         logger.error(f"Error occurred: {str(e)}")
         # Always print traceback with --debug or --show-traceback

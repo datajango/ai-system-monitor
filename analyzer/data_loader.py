@@ -82,6 +82,7 @@ class SystemStateDataLoader:
         
         if not analysis_focus or "All" in analysis_focus:
             sections_to_include = list(index.keys())
+            #sections_to_include = list(index["files"])
             logger.debug(f"Including all {len(sections_to_include)} sections")
         else:
             for section in analysis_focus:
@@ -95,7 +96,7 @@ class SystemStateDataLoader:
         
         # Load each section
         loaded_sections = 0
-        for section in sections_to_include:
+        for section in sections_to_include:            
             section_file = snapshot_dir / index[section]
             
             if section_file.exists():

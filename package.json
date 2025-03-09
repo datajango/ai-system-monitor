@@ -1,0 +1,22 @@
+{
+    "name": "system-monitor-app",
+    "version": "0.1.0",
+    "description": "System State Monitor and Analyzer Application",
+    "scripts": {
+        "backend:install": "cd backend && npm install",
+        "frontend:install": "cd frontend && npm install",
+        "scripts:install": "cd scripts && npm install",
+        "install:all": "npm run backend:install && npm run frontend:install && npm run scripts:install",
+        "backend:start": "cd backend && npm run start",
+        "backend:dev": "cd backend && npm run dev",
+        "frontend:dev": "cd frontend && npm run dev",
+        "frontend:build": "cd frontend && npm run build",
+        "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+        "test:api": "cd scripts && npm run test:api"
+    },
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}
