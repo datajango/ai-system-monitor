@@ -1,0 +1,68 @@
+<div id="snapshots" class="tab-content">
+  <h2>Snapshot Details</h2>
+  <% summary.snapshotsDetails.matchingSnapshots.forEach(id => { const comparison
+  = details.fileComparisons.find(fc => fc.snapshotId === id); const hasIssues =
+  comparison.missingInApi.length + comparison.missingInFs.length +
+  comparison.contentDifferences.length; %>
+  <div class="snapshot-card">
+    <h3>
+      <%= id %>
+      <span class="<%= hasIssues > 0 ? 'error' : 'success' %>"
+        >(<%= hasIssues > 0 ? `${hasIssues} issues` : 'No issues' %>)</span
+      >
+    </h3>
+    <p>File comparison:</p>
+    <ul>
+      <li>Matching files: <%= comparison.matchingFiles.length %></li>
+      <li>
+        Files missing in API:
+        <span class="<%= comparison.missingInApi.length > 0 ? 'warning' : '' %>"
+          ><%= comparison.missingInApi.length %></span
+        >
+      </li>
+      <li>
+        Files missing in filesystem:
+        <span class="<%= comparison.missingInFs.length > 0 ? 'warning' : '' %>"
+          ><%= comparison.missingInFs.length %></span
+        >
+      </li>
+      <li>
+        Files with content differences:
+        <span
+          class="<%= comparison.contentDifferences.length > 0 ? 'error' : '' %>"
+          ><%= comparison.contentDifferences.length %></span
+        >
+      </li>
+    </ul>
+
+    <% if (comparison.missingInApi.length > 0) { %>
+    <p class="warning">Files missing in API:</p>
+    <div class="file-list">
+      <ul>
+        <% comparison.missingInApi.forEach(file => { %>
+        <li><%= file %></li>
+        <% }); %>
+      </ul>
+    </div>
+    <% } %> <% if (comparison.missingInFs.length > 0) { %>
+    <p class="warning">Files missing in filesystem:</p>
+    <div class="file-list">
+      <ul>
+        <% comparison.missingInFs.forEach(file => { %>
+        <li><%= file %></li>
+        <% }); %>
+      </ul>
+    </div>
+    <% } %> <% if (comparison.contentDifferences.length > 0) { %>
+    <p class="error">Files with content differences:</p>
+    <div class="file-list">
+      <ul>
+        <% comparison.contentDifferences.forEach(diff => { %>
+        <li><%= diff.fileName %></li>
+        <% }); %>
+      </ul>
+    </div>
+    <% } %>
+  </div>
+  <% }); %>
+</div>

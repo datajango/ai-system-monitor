@@ -1,0 +1,670 @@
+{
+  "matchingSnapshots": [
+    "SystemState_2025-03-09_05-27-30",
+    "SystemState_2025-03-09_05-27-41"
+  ],
+  "missingInApi": [],
+  "missingInFs": [],
+  "fileComparisons": [
+    {
+      "snapshotId": "SystemState_2025-03-09_05-27-30",
+      "matchingFiles": [
+        "Browsers.json",
+        "DiskSpace.json",
+        "Drivers.json",
+        "Environment.json",
+        "Fonts.json",
+        "index.json",
+        "InstalledPrograms.json",
+        "metadata.json",
+        "Network.json",
+        "Path.json",
+        "PerformanceData.json",
+        "PythonInstallations.json",
+        "RegistrySettings.json",
+        "RunningServices.json",
+        "ScheduledTasks.json",
+        "StartupPrograms.json",
+        "WindowsFeatures.json",
+        "WindowsUpdates.json"
+      ],
+      "missingInApi": [],
+      "missingInFs": [],
+      "contentDifferences": [
+        {
+          "fileName": "Browsers.json",
+          "fsSize": 4373,
+          "apiSize": 4373,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "DiskSpace.json",
+          "fsSize": 3234,
+          "apiSize": 3234,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "Drivers.json",
+          "fsSize": 110618,
+          "apiSize": 110618,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "Environment.json",
+          "fsSize": 32076,
+          "apiSize": 32076,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "Fonts.json",
+          "fsSize": 48068,
+          "apiSize": 48068,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "index.json",
+          "fsSize": 673,
+          "apiSize": 673,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "DiskSpace",
+                "Fonts",
+                "Drivers",
+                "RegistrySettings",
+                "InstalledPrograms",
+                "ScheduledTasks",
+                "WindowsFeatures",
+                "StartupPrograms",
+                "RunningServices",
+                "WindowsUpdates",
+                "PerformanceData",
+                "PythonInstallations",
+                "Browsers",
+                "Environment",
+                "Path",
+                "Network"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "InstalledPrograms.json",
+          "fsSize": 119803,
+          "apiSize": 119803,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "metadata.json",
+          "fsSize": 216,
+          "apiSize": 216,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "UserName",
+                "SnapshotDate",
+                "Timestamp",
+                "OSVersion",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "Network.json",
+          "fsSize": 18940,
+          "apiSize": 18940,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "Path.json",
+          "fsSize": 6781,
+          "apiSize": 6781,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "PerformanceData.json",
+          "fsSize": 442,
+          "apiSize": 442,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "PythonInstallations.json",
+          "fsSize": 1638,
+          "apiSize": 1638,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "RegistrySettings.json",
+          "fsSize": 13716,
+          "apiSize": 13716,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "RunningServices.json",
+          "fsSize": 27997,
+          "apiSize": 27997,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "ScheduledTasks.json",
+          "fsSize": 157,
+          "apiSize": 157,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "StartupPrograms.json",
+          "fsSize": 8228,
+          "apiSize": 8228,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "WindowsFeatures.json",
+          "fsSize": 158,
+          "apiSize": 158,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "WindowsUpdates.json",
+          "fsSize": 34118,
+          "apiSize": 34118,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "snapshotId": "SystemState_2025-03-09_05-27-41",
+      "matchingFiles": [
+        "Browsers.json",
+        "DiskSpace.json",
+        "Drivers.json",
+        "Environment.json",
+        "Fonts.json",
+        "index.json",
+        "InstalledPrograms.json",
+        "metadata.json",
+        "Network.json",
+        "Path.json",
+        "PerformanceData.json",
+        "PythonInstallations.json",
+        "RegistrySettings.json",
+        "RunningServices.json",
+        "ScheduledTasks.json",
+        "StartupPrograms.json",
+        "WindowsFeatures.json",
+        "WindowsUpdates.json"
+      ],
+      "missingInApi": [],
+      "missingInFs": [],
+      "contentDifferences": [
+        {
+          "fileName": "Browsers.json",
+          "fsSize": 4373,
+          "apiSize": 4373,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "DiskSpace.json",
+          "fsSize": 3234,
+          "apiSize": 3234,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "Drivers.json",
+          "fsSize": 110618,
+          "apiSize": 110618,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "Environment.json",
+          "fsSize": 32076,
+          "apiSize": 32076,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "Fonts.json",
+          "fsSize": 48068,
+          "apiSize": 48068,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "index.json",
+          "fsSize": 689,
+          "apiSize": 689,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "DiskSpace",
+                "Fonts",
+                "Drivers",
+                "RegistrySettings",
+                "InstalledPrograms",
+                "ScheduledTasks",
+                "WindowsFeatures",
+                "StartupPrograms",
+                "RunningServices",
+                "WindowsUpdates",
+                "PerformanceData",
+                "PythonInstallations",
+                "Browsers",
+                "Environment",
+                "Path",
+                "Network"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "InstalledPrograms.json",
+          "fsSize": 119803,
+          "apiSize": 119803,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "metadata.json",
+          "fsSize": 221,
+          "apiSize": 221,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "UserName",
+                "SnapshotDate",
+                "Timestamp",
+                "OSVersion",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "Network.json",
+          "fsSize": 34919,
+          "apiSize": 34919,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "Path.json",
+          "fsSize": 6781,
+          "apiSize": 6781,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "PerformanceData.json",
+          "fsSize": 441,
+          "apiSize": 441,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "PythonInstallations.json",
+          "fsSize": 1638,
+          "apiSize": 1638,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "RegistrySettings.json",
+          "fsSize": 13716,
+          "apiSize": 13716,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "RunningServices.json",
+          "fsSize": 27657,
+          "apiSize": 27657,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "ScheduledTasks.json",
+          "fsSize": 157,
+          "apiSize": 157,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "StartupPrograms.json",
+          "fsSize": 8228,
+          "apiSize": 8228,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "WindowsFeatures.json",
+          "fsSize": 158,
+          "apiSize": 158,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        },
+        {
+          "fileName": "WindowsUpdates.json",
+          "fsSize": 34118,
+          "apiSize": 34118,
+          "diff": [
+            {
+              "path": "(root)",
+              "issue": "missing_keys_in_api",
+              "keys": [
+                "Timestamp",
+                "Data",
+                "ComputerName"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

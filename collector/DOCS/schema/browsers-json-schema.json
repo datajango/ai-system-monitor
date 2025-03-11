@@ -1,0 +1,187 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "System State Collector - Browsers Data",
+  "description": "Schema for browser data collected by the System State Collector",
+  "type": "object",
+  "required": ["Timestamp", "ComputerName", "Data"],
+  "properties": {
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 format timestamp when the data was collected"
+    },
+    "ComputerName": {
+      "type": "string",
+      "description": "Name of the computer from which data was collected"
+    },
+    "Data": {
+      "type": "object",
+      "description": "Container for all browser-related data",
+      "properties": {
+        "InstalledBrowsers": {
+          "type": "array",
+          "description": "List of web browsers detected on the system",
+          "items": {
+            "type": "object",
+            "required": ["Name", "Path", "Version"],
+            "properties": {
+              "Name": {
+                "type": "string",
+                "description": "Display name of the browser",
+                "examples": ["Google Chrome", "Mozilla Firefox", "Microsoft Edge"]
+              },
+              "Path": {
+                "type": "string",
+                "description": "Full filesystem path to the browser executable",
+                "examples": ["C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"]
+              },
+              "Version": {
+                "type": "string",
+                "description": "Version string of the browser",
+                "examples": ["122.0.6261.112"]
+              }
+            }
+          }
+        },
+        "ChromeExtensions": {
+          "type": "array",
+          "description": "Extensions installed in Google Chrome",
+          "items": {
+            "type": "object",
+            "required": ["ID", "Name", "Version"],
+            "properties": {
+              "ID": {
+                "type": "string",
+                "description": "Unique identifier for the Chrome extension",
+                "examples": ["aapbdbdomjkkjkaonfhkkikfgjllcleb"]
+              },
+              "Name": {
+                "type": "string",
+                "description": "Display name of the extension (may be localized)",
+                "examples": ["Google Translate", "Localized: appName"]
+              },
+              "Version": {
+                "type": "string",
+                "description": "Version string of the extension",
+                "examples": ["2.0.13"]
+              },
+              "Description": {
+                "type": "string",
+                "description": "Short description of the extension (may be truncated to 50 characters)",
+                "examples": ["View translations easily as you browse the web..."]
+              }
+            }
+          }
+        },
+        "EdgeExtensions": {
+          "type": "array",
+          "description": "Extensions installed in Microsoft Edge",
+          "items": {
+            "type": "object",
+            "required": ["ID", "Name", "Version"],
+            "properties": {
+              "ID": {
+                "type": "string",
+                "description": "Unique identifier for the Edge extension",
+                "examples": ["jmjflgjpcpepeafmmgdpfkogkghcpiha"]
+              },
+              "Name": {
+                "type": "string",
+                "description": "Display name of the extension (may be localized)",
+                "examples": ["Microsoft Editor", "Localized: appName"]
+              },
+              "Version": {
+                "type": "string",
+                "description": "Version string of the extension",
+                "examples": ["1.0.7.1"]
+              },
+              "Description": {
+                "type": "string",
+                "description": "Short description of the extension (may be truncated to 50 characters)",
+                "examples": ["Grammar checking and writing suggestions..."]
+              }
+            }
+          }
+        },
+        "FirefoxAddons": {
+          "type": "array",
+          "description": "Add-ons installed in Mozilla Firefox",
+          "items": {
+            "type": "object",
+            "required": ["ID", "Name", "Version"],
+            "properties": {
+              "ID": {
+                "type": "string",
+                "description": "Unique identifier for the Firefox add-on",
+                "examples": ["uBlock0@raymondhill.net"]
+              },
+              "Name": {
+                "type": "string",
+                "description": "Display name of the add-on",
+                "examples": ["uBlock Origin"]
+              },
+              "Version": {
+                "type": "string",
+                "description": "Version string of the add-on",
+                "examples": ["1.46.0"]
+              },
+              "Description": {
+                "type": "string",
+                "description": "Short description of the add-on (may be truncated to 50 characters)",
+                "examples": ["Finally, an efficient blocker..."]
+              },
+              "Active": {
+                "type": "boolean",
+                "description": "Whether the add-on is currently enabled",
+                "examples": [true, false]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "Timestamp": "2025-03-10T15:30:45.0000000Z",
+      "ComputerName": "WORKSTATION-01",
+      "Data": {
+        "InstalledBrowsers": [
+          {
+            "Name": "Google Chrome",
+            "Path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "Version": "122.0.6261.112"
+          },
+          {
+            "Name": "Microsoft Edge",
+            "Path": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+            "Version": "121.0.2277.128"
+          }
+        ],
+        "ChromeExtensions": [
+          {
+            "ID": "aapbdbdomjkkjkaonfhkkikfgjllcleb",
+            "Name": "Google Translate",
+            "Version": "2.0.13",
+            "Description": "View translations easily as you browse the web..."
+          },
+          {
+            "ID": "cjpalhdlnbpafiamejdnhcphjbkeiagm",
+            "Name": "uBlock Origin",
+            "Version": "1.52.2",
+            "Description": "Finally, an efficient blocker..."
+          }
+        ],
+        "EdgeExtensions": [
+          {
+            "ID": "jmjflgjpcpepeafmmgdpfkogkghcpiha",
+            "Name": "Microsoft Editor",
+            "Version": "1.0.7.1",
+            "Description": "Grammar checking and writing suggestions..."
+          }
+        ],
+        "FirefoxAddons": []
+      }
+    }
+  ]
+}
