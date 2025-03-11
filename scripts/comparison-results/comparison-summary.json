@@ -1,0 +1,70 @@
+{
+  "totalSnapshots": {
+    "filesystem": 2,
+    "api": 2,
+    "matching": 2
+  },
+  "snapshotsDetails": {
+    "matchingSnapshots": [
+      "SystemState_2025-03-09_05-27-30",
+      "SystemState_2025-03-09_05-27-41"
+    ],
+    "missingInApi": [],
+    "missingInFs": []
+  },
+  "fileIssues": 36,
+  "fileComparisons": [
+    {
+      "snapshotId": "SystemState_2025-03-09_05-27-30",
+      "matchingFiles": 18,
+      "missingInApi": [],
+      "missingInFs": [],
+      "contentDifferences": [
+        "Browsers.json",
+        "DiskSpace.json",
+        "Drivers.json",
+        "Environment.json",
+        "Fonts.json",
+        "index.json",
+        "InstalledPrograms.json",
+        "metadata.json",
+        "Network.json",
+        "Path.json",
+        "PerformanceData.json",
+        "PythonInstallations.json",
+        "RegistrySettings.json",
+        "RunningServices.json",
+        "ScheduledTasks.json",
+        "StartupPrograms.json",
+        "WindowsFeatures.json",
+        "WindowsUpdates.json"
+      ]
+    },
+    {
+      "snapshotId": "SystemState_2025-03-09_05-27-41",
+      "matchingFiles": 18,
+      "missingInApi": [],
+      "missingInFs": [],
+      "contentDifferences": [
+        "Browsers.json",
+        "DiskSpace.json",
+        "Drivers.json",
+        "Environment.json",
+        "Fonts.json",
+        "index.json",
+        "InstalledPrograms.json",
+        "metadata.json",
+        "Network.json",
+        "Path.json",
+        "PerformanceData.json",
+        "PythonInstallations.json",
+        "RegistrySettings.json",
+        "RunningServices.json",
+        "ScheduledTasks.json",
+        "StartupPrograms.json",
+        "WindowsFeatures.json",
+        "WindowsUpdates.json"
+      ]
+    }
+  ]
+}

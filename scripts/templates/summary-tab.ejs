@@ -1,0 +1,63 @@
+<div id="summary" class="tab-content active">
+  <div class="summary">
+    <h2>Overview</h2>
+    <p>
+      Total snapshots in filesystem:
+      <strong><%= summary.totalSnapshots.filesystem %></strong>
+    </p>
+    <p>
+      Total snapshots in API: <strong><%= summary.totalSnapshots.api %></strong>
+    </p>
+    <p>
+      Matching snapshots:
+      <strong><%= summary.totalSnapshots.matching %></strong>
+    </p>
+    <p>
+      Snapshots missing in API:
+      <strong
+        class="<%= summary.snapshotsDetails.missingInApi.length > 0 ? 'warning' : 'success' %>"
+        ><%= summary.snapshotsDetails.missingInApi.length %></strong
+      >
+    </p>
+    <p>
+      Snapshots missing in filesystem:
+      <strong
+        class="<%= summary.snapshotsDetails.missingInFs.length > 0 ? 'warning' : 'success' %>"
+        ><%= summary.snapshotsDetails.missingInFs.length %></strong
+      >
+    </p>
+    <p>
+      Total file issues found:
+      <strong class="<%= summary.fileIssues > 0 ? 'error' : 'success' %>"
+        ><%= summary.fileIssues %></strong
+      >
+    </p>
+  </div>
+
+  <h2>Missing Snapshots</h2>
+  <% if (summary.snapshotsDetails.missingInApi.length > 0) { %>
+  <h3>
+    Snapshots in filesystem but missing in API (<%=
+    summary.snapshotsDetails.missingInApi.length %>):
+  </h3>
+  <ul>
+    <% summary.snapshotsDetails.missingInApi.forEach(id => { %>
+    <li><%= id %></li>
+    <% }); %>
+  </ul>
+  <% } else { %>
+  <p class="success">No snapshots missing in API</p>
+  <% } %> <% if (summary.snapshotsDetails.missingInFs.length > 0) { %>
+  <h3>
+    Snapshots in API but missing in filesystem (<%=
+    summary.snapshotsDetails.missingInFs.length %>):
+  </h3>
+  <ul>
+    <% summary.snapshotsDetails.missingInFs.forEach(id => { %>
+    <li><%= id %></li>
+    <% }); %>
+  </ul>
+  <% } else { %>
+  <p class="success">No snapshots missing in filesystem</p>
+  <% } %>
+</div>

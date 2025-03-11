@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snapshot Comparison Report</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #333;
+      }
+      .summary {
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      .success {
+        color: green;
+      }
+      .warning {
+        color: orange;
+      }
+      .error {
+        color: red;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 10px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      .file-list {
+        margin-left: 20px;
+      }
+      .snapshot-card {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        padding: 15px;
+      }
+      .tabs {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 15px;
+      }
+      .tab {
+        padding: 10px 15px;
+        cursor: pointer;
+      }
+      .tab.active {
+        border-bottom: 2px solid #007bff;
+        font-weight: bold;
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Snapshot Comparison Report</h1>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('summary')">Summary</div>
+      <div class="tab" onclick="switchTab('snapshots')">Snapshots</div>
+      <div class="tab" onclick="switchTab('files')">File Differences</div>
+    </div>
+
+    <%- include('summary-tab', { summary }) %> <%- include('snapshots-tab', {
+    summary, details }) %> <%- include('files-tab', { details }) %>
+
+    <script>
+      function switchTab(tabId) {
+        // Hide all tab contents
+        const tabContents = document.querySelectorAll(".tab-content");
+        tabContents.forEach((content) => {
+          content.classList.remove("active");
+        });
+
+        // Deactivate all tabs
+        const tabs = document.querySelectorAll(".tab");
+        tabs.forEach((tab) => {
+          tab.classList.remove("active");
+        });
+
+        // Activate selected tab
+        document.getElementById(tabId).classList.add("active");
+        document
+          .querySelector(`.tab[onclick="switchTab('${tabId}')"]`)
+          .classList.add("active");
+      }
+    </script>
+  </body>
+</html>
